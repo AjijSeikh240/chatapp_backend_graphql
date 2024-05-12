@@ -6,7 +6,6 @@ import Sequelize from "sequelize";
 import { fileURLToPath } from "node:url";
 import * as dbConfig from "../config/db.config.js";
 // const env = process.env.NODE_ENV || "development";
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const basename = path.basename(__filename);
