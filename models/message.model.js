@@ -11,16 +11,16 @@ const Message = (sequelize, DataTypes) => {
       message: {
         type: DataTypes.STRING,
         allowNull: false,
-        trim: true,
-        validate: {
-          notNull: {
-            msg: "Please provide your message",
-          },
-        },
+        // trim: true,
+        // validate: {
+        //   notNull: {
+        //     msg: "Please provide your message",
+        //   },
+        // },
       },
       userId: DataTypes.INTEGER,
 
-      files: { type: DataTypes.ARRAY, defaultValue: [] },
+      files: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
     },
     {}
   );

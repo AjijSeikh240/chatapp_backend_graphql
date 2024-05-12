@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-
+console.log("process.env.DB", process.env.DB);
 export default {
   HOST: process.env.DBHOST,
   USER: process.env.DBUSER,

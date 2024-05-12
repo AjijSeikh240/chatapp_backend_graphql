@@ -9,22 +9,22 @@ const Conversation = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      trim: true,
-      validate: {
-        len: [5, 10],
-        notNull: {
-          msg: "Please enter your name",
-        },
-      },
+      //   trim: true,
+      //   validate: {
+      //     len: [5, 10],
+      //     notNull: {
+      //       msg: "Please enter your name",
+      //     },
+      //   },
     },
     picture: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        notNull: {
-          msg: "Please provide you picture",
-        },
-      },
+      //   validate: {
+      //     notNull: {
+      //       msg: "Please provide you picture",
+      //     },
+      //   },
     },
     isGroup: {
       type: DataTypes.BOOLEAN,
