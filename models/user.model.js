@@ -30,11 +30,17 @@ const User = (sequelize, DataTypes) => {
   });
   User.associate = function (models) {
     User.hasMany(models.Message, {
-      foreignKey: "userId",
+      foreignKey: "senderId",
     });
     User.hasMany(models.Conversation, {
-      foreignKey: "userId",
+      foreignKey: "serderId",
+      as: "sender",
     });
+    User.hasMany(models.Conversation, {
+      foreignKey: "receiverId",
+      as: "receiver",
+    });
+    User.hasOne(models.Conversation, { foreignKey: "adminId" });
   };
   return User;
 };

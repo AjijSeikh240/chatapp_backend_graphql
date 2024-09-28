@@ -2,7 +2,7 @@
   "development": {
     "username": "root",
     "password": null,
-    "database": "whatsapp_db",
+    "database": "whatsapp_db_dev",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },

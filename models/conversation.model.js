@@ -9,32 +9,32 @@ const Conversation = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      //   trim: true,
-      //   validate: {
-      //     len: [5, 10],
-      //     notNull: {
-      //       msg: "Please enter your name",
-      //     },
-      //   },
+      validate: {
+        len: [5, 10],
+        notNull: {
+          msg: "Please enter your name",
+        },
+      },
     },
     picture: {
       type: DataTypes.STRING,
       allowNull: false,
-      //   validate: {
-      //     notNull: {
-      //       msg: "Please provide you picture",
-      //     },
-      //   },
+      validate: {
+        notNull: {
+          msg: "Please provide you picture",
+        },
+      },
+    },
+    senderId: DataTypes.INTEGER,
+    receiverId: DataTypes.INTEGER,
+    latestMessageId: DataTypes.INTEGER,
+    isAdmin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     isGroup: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: false,
-    },
-    userId: DataTypes.INTEGER,
-    messageId: DataTypes.INTEGER,
-    isAdmin: {
-      type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
     isActive: {
@@ -44,8 +44,14 @@ const Conversation = (sequelize, DataTypes) => {
   });
   Conversation.associate = function (models) {
     // associations can be defined here
-    Conversation.belongsTo(models.User, { foreignKey: "userId" });
-    Conversation.belongsTo(models.Message, { foreignKey: "messageId" });
+    Conversation.belongsTo(models.User, { foreignKey: "senderId" });
+    Conversation.belongsTo(models.User, { foreignKey: "receiverId" });
+    Conversation.belongsTo(models.User, { foreignKey: "adminId" });
+    Conversation.belongsTo(models.Message, { foreignKey: "latestMessageId" });
+    Conversation.hasMany(models.Message, {
+      foreignKey: "conversationId",
+      onDelete: "CASCADE",
+    });
   };
   return Conversation;
 };
