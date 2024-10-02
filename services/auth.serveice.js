@@ -1,115 +1,77 @@
-import createHttpError from "http-errors";
-import validator from "validator";
-import databaseModel from "../models/index.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import databaseModel from "../models/index.js";
+import { sendResponse } from "../utils/response.send.util.js";
 
 // env variables
 const { DEFAULT_PICTURE, DEFAULT_STATUS } = process.env;
 
-// authentication
-export const userToken = async (bearerToken) => {
-  const bearer = bearerToken?.split(" ");
-  let token;
-  if (bearer) {
-    token = bearer[1];
-  }
-
-  try {
-    const userDecoded = jwt.verify(token, process.env.SECRET_KEY);
-    const userAuthentication = {
-      userId: userDecoded?.userId,
-    };
-    return { userAuthentication };
-  } catch (error) {
-    return { userAuthentication: null };
-  }
-};
-
 // Register
 export const SignUpUser = async (userData) => {
-  let { name, email, picture, status, password, confirmPassword } = userData;
-  // check if field are empty
-  if (!name || !email || !password) {
-    throw createHttpError.BadRequest("Please fill all field");
-  }
+  try {
+    let { name, email, picture, status, password } = userData;
 
-  // check name length
-  if (
-    !validator.isLength(name, {
-      min: 2,
-      max: 16,
-    })
-  ) {
-    throw createHttpError.BadRequest(
-      "Please Provide your name is between 2 and 16 characters."
-    );
-  }
+    const hashPassword = bcrypt.hash(password, 10);
+    password = await hashPassword;
 
-  // check status length
-  if (status && status > 64) {
-    throw createHttpError.BadRequest(
-      "Please make sure your status is less than 64 character"
-    );
-  }
-  // check isf email is valid
-  if (!validator.isEmail(email)) {
-    throw createHttpError.BadRequest(
-      "Please make sure to provide a valid email address."
-    );
-  }
-  if (password !== confirmPassword) {
-    throw createHttpError[409]("Oops... password mismatch");
-  }
+    // check is user already exist
+    const checkDb = await databaseModel.User.findOne({
+      where: { email: email },
+    });
+    if (checkDb) {
+      throw sendResponse(409, false, "This email already exist.");
+    }
 
-  const hashPassword = bcrypt.hash(password, 10);
-  password = await hashPassword;
+    const user = await databaseModel.User.create({
+      name,
+      email,
+      picture: picture || DEFAULT_PICTURE,
+      status: status || DEFAULT_STATUS,
+      password,
+    });
 
-  // check is user already exist
-  const checkDb = await databaseModel.User.findOne({ where: { email: email } });
-  if (checkDb) {
-    throw createHttpError.Conflict(
-      "Please try again with a different email address, this email already exist."
-    );
+    return user;
+  } catch (error) {
+    console.log("Occurred server error", error);
+    throw error;
   }
-
-  const user = await databaseModel.User.create({
-    name,
-    email,
-    picture: picture || DEFAULT_PICTURE,
-    status: status || DEFAULT_STATUS,
-    password,
-  });
-
-  return user;
 };
 
 // Login
 export const signInUser = async (email, password) => {
-  const user = await databaseModel.User.findOne({
-    where: {
-      email: email.toLowerCase(),
-    },
-  });
+  try {
+    const user = await databaseModel.User.findOne({
+      where: {
+        email: email.toLowerCase(),
+      },
+    });
 
-  // check user exist
-  if (!user) {
-    throw createHttpError.NotFound("Invalid credentials");
-  }
+    // check user exist
+    if (!user) {
+      throw sendResponse(400, false, "Invalid credentials");
+    } else {
+      // compare password
+      let passwordMatches = await bcrypt.compare(password, user.password);
 
-  // compare password
-  let passwordMatches = await bcrypt.compare(password, user.password);
+      if (!passwordMatches) {
+        throw sendResponse(400, false, "Invalid credential");
+      } else {
+        const token = jwt.sign(
+          { userId: user.dataValues.id },
+          process.env.SECRET_KEY,
+          {
+            algorithm: process.env.JWT_ALGORITHM,
+            expiresIn: process.env.EXPIRES_IN,
+          }
+        );
+        user.token = token;
+        delete user.password;
 
-  if (!passwordMatches) throw createHttpError.NotFound("Invalid credentials");
-  const token = jwt.sign(
-    { userId: user.dataValues.id },
-    process.env.SECRET_KEY,
-    {
-      algorithm: process.env.JWT_ALGORITHM,
-      expiresIn: process.env.EXPIRES_IN,
+        return user;
+      }
     }
-  ); // expires in 30 days
-  user.token = token;
-
-  return user;
+  } catch (error) {
+    console.log("Occurred server error", error);
+    throw error;
+  }
 };

@@ -27,20 +27,26 @@ const User = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
   });
   User.associate = function (models) {
     User.hasMany(models.Message, {
       foreignKey: "senderId",
+      onDelete: "CASCADE",
     });
     User.hasMany(models.Conversation, {
       foreignKey: "serderId",
       as: "sender",
+      onDelete: "CASCADE",
     });
     User.hasMany(models.Conversation, {
       foreignKey: "receiverId",
       as: "receiver",
+      onDelete: "CASCADE",
     });
-    User.hasOne(models.Conversation, { foreignKey: "adminId" });
   };
   return User;
 };

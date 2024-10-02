@@ -16,14 +16,20 @@ const Message = (sequelize, DataTypes) => {
         },
       },
     },
-    userId: DataTypes.INTEGER,
-    conversationId: ataTypes.INTEGER,
+    senderId: DataTypes.INTEGER,
+    conversationId: DataTypes.INTEGER,
     files: DataTypes.JSON,
   });
   Message.associate = function (models) {
     // associations can be defined here
-    Message.belongsTo(models.User, { foreignKey: "senderId" });
-    Message.belongsTo(models.Conversation, { foreignKey: "conversationId" });
+    Message.belongsTo(models.User, {
+      foreignKey: "senderId",
+      onDelete: "CASCADE",
+    });
+    Message.belongsTo(models.Conversation, {
+      foreignKey: "conversationId",
+      onDelete: "CASCADE",
+    });
     Message.hasMany(models.Conversation, {
       foreignKey: "latestMessageId",
       onDelete: "CASCADE",

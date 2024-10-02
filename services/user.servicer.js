@@ -2,22 +2,30 @@ import databaseModel from "../models/index.js";
 import { Sequelize, Op } from "sequelize";
 
 export const findUser = async (userId) => {
-  const user = await databaseModel.User.findByPk(userId);
-  return user;
+  try {
+    const user = await databaseModel.User.findByPk(userId);
+
+    return user;
+  } catch (error) {
+    console.log("Occurred server error", error);
+    throw error;
+  }
 };
 
 export const searchUsers = async (searchParam, userId) => {
-  const users = await databaseModel.User.findAll({
-    where: {
-      id: {
-        [Sequelize.Op.not]: userId, // Exclude the user with the specified ID
+  try {
+    const users = await databaseModel.User.findAll({
+      where: {
+        // id: {
+        //   [Sequelize.Op.not]: userId, // Exclude the user with the specified ID
+        // },
+        [Op.or]: [{ name: { [Op.like]: `%${searchParam}%` } }],
       },
-      [Op.or]: [
-        { name: { [Op.like]: `%${searchParam}% ` } },
-        { email: { [Op.like]: `%${searchParam}%` } },
-      ],
-    },
-  });
-
-  return users;
+    });
+    // console.log("users", users);
+    return users;
+  } catch (error) {
+    console.log("Occurred server error", error);
+    throw error;
+  }
 };

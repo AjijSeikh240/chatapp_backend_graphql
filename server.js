@@ -10,6 +10,7 @@ import cors from "cors";
 import jwt from "jsonwebtoken";
 import resolvers from "./graphql/resolvers/resolvers.js";
 import typeDefs from "./graphql/schema/schema.js";
+import { getAuthentication } from "./utils/authentication.js";
 
 const app = express();
 
@@ -26,24 +27,38 @@ const server = new ApolloServer({
 });
 
 await server.start();
+app.use(cors(), express.json());
+
+// get authentication context data
+// const getContext = await getAuthentication({ req });
 
 app.use(
-  cors(),
-  express.json(),
   expressMiddleware(server, {
     context: async ({ req }) => {
-      const token = req.headers.authorization;
+      const bearerToken = req.headers.authorization;
+      // await getAuthentication(req);
+      console.log("bearerToken", bearerToken);
       try {
-        if (!token)
+        if (!bearerToken) {
           return {
-            userAuthentication: { userId: null, message: "token is not exist" },
+            userAuthentication: {
+              userId: null,
+              errorMessage: "token is not exist",
+            },
           };
-        const userDecoded = jwt.verify(token, process.env.SECRET_KET);
-        const userAuthentication = { userId: userDecoded?.userId };
-        return { userAuthentication };
+        } else {
+          const token = bearerToken.split(" ")[1];
+          const userDecoded = jwt.verify(token, process.env.SECRET_KEY);
+          const userAuthentication = { userId: userDecoded?.userId };
+          return { userAuthentication };
+        }
       } catch (error) {
+        console.log("error", error);
         return {
-          userAuthentication: { userId: null, message: "User Unauthorized" },
+          userAuthentication: {
+            userId: null,
+            errorMessage: "User Unauthorized",
+          },
         };
       }
     },

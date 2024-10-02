@@ -10,7 +10,7 @@ const Conversation = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        len: [5, 10],
+        len: [5, 50],
         notNull: {
           msg: "Please enter your name",
         },
@@ -28,15 +28,6 @@ const Conversation = (sequelize, DataTypes) => {
     senderId: DataTypes.INTEGER,
     receiverId: DataTypes.INTEGER,
     latestMessageId: DataTypes.INTEGER,
-    isAdmin: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    isGroup: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
@@ -44,10 +35,19 @@ const Conversation = (sequelize, DataTypes) => {
   });
   Conversation.associate = function (models) {
     // associations can be defined here
-    Conversation.belongsTo(models.User, { foreignKey: "senderId" });
-    Conversation.belongsTo(models.User, { foreignKey: "receiverId" });
-    Conversation.belongsTo(models.User, { foreignKey: "adminId" });
-    Conversation.belongsTo(models.Message, { foreignKey: "latestMessageId" });
+    Conversation.belongsTo(models.User, {
+      foreignKey: "senderId",
+      onDelete: "CASCADE",
+    });
+    Conversation.belongsTo(models.User, {
+      foreignKey: "receiverId",
+      onDelete: "CASCADE",
+    });
+
+    Conversation.belongsTo(models.Message, {
+      foreignKey: "latestMessageId",
+      onDelete: "CASCADE",
+    });
     Conversation.hasMany(models.Message, {
       foreignKey: "conversationId",
       onDelete: "CASCADE",

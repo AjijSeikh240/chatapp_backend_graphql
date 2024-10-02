@@ -45,8 +45,6 @@ scalar GraphQLDateTime
     user:User
     message:[Message]
     receiver: User
-    isGroup:Boolean
-    isAdmin:Boolean
     isActive:Boolean
   }
 
@@ -67,37 +65,30 @@ scalar GraphQLDateTime
   type CreateUserResponses {
     code:Int!
     status:Boolean!
-    ack:Int!
     msg:String!
     data:User
   }
   #---- end----
-  # ------- Responses for Message ------
-    type CreateMessageResponses {
-    code:Int!
-    status:Boolean!
-    ack:Int!
-    msg:String!
-    data:Message
-  }
-  
+
+  # ---------- Response for login user -----------#
+ 
+  # ------- Responses for Message ------#
+
   type SendMessageResponse {
     code:Int!
     status:Boolean!
-    ack:Int!
     msg:String!
-    message:Message
+    data:Message
   }
-  #---- end----
-    # ------- Responses for Conversation ------
+  #---- end----#
+    # ------- Responses for Conversation ----------#
     type CreateConversationResponses {
     code:Int!
     status:Boolean!
-    ack:Int!
     msg:String!
     data:Conversation
   }
-  #---- end----
+  #---- end-----#
 
  # --  union CustomCreateConversationRes = SendMessageResponse | CreateConversationResponses
 
@@ -129,11 +120,7 @@ scalar GraphQLDateTime
     name:String
     picture:String
     receiverId:Int!
-    latestMessageId:Int
-     isGroup:Boolean!
-    isAdmin:Boolean
-    isActive:Boolean
-   
+    isActive:String
   }
 #--- conversation input end -----
 
@@ -143,10 +130,8 @@ scalar GraphQLDateTime
     searchUser(searchParam:String) :[User]
     oneUser(id: Int!): User
     allUser: [User!]!
-    manyMessage(id: Int!): User
-    allMessage: [Message!]!
     oneMessage(id: Int!): Message
-    getUserConversation:Conversation
+    getConversation:Conversation
     getMessage(conversationId:Int!):Message
     
 
@@ -169,9 +154,7 @@ scalar GraphQLDateTime
     deleteUser(id:Int!):CreateUserResponses
 # ------------ User section end --------
 # ------- Message section -----
-    createMessage(
-     input:CreateMessageInput!
-    ): CreateMessageResponses!
+  
   
    sendMessage(input:CreateMessageInput!) :SendMessageResponse!
 
@@ -179,9 +162,9 @@ scalar GraphQLDateTime
       id: Int!
       message:String!
       files:JSON
-    ): CreateMessageResponses
+    ): SendMessageResponse
 
-    deleteMessage(id: Int!): CreateMessageResponses!
+    deleteMessage(id: Int!): SendMessageResponse!
 # -------- Message section end -----
 
 #------ Conversation section -----------
@@ -190,9 +173,7 @@ scalar GraphQLDateTime
       id:Int!
       name:String
       picture:String
-      latestMessageId:Int!
-      isGroup:Boolean
-      isAdmin:Boolean
+      latestMessageId:Int
       isActive:Boolean
      ): CreateConversationResponses
      deleteConversation(id:Int!): CreateConversationResponses
@@ -202,7 +183,7 @@ scalar GraphQLDateTime
 
 #------ user Log in section ---------
  userSignUp(input:CreateUserInput!):CreateUserResponses
-    userSignIn(email: String!,password:String!): User
+    userSignIn(email: String!,password:String!): CreateUserResponses
   }
 `;
 

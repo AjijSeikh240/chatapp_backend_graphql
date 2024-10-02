@@ -63,10 +63,7 @@ const fileData = async function () {
 
   //
 
-  // sequelize
-  //   .sync({ alter: true })
-  //   .then(() => console.log(`table created`))
-  //   .catch((error) => console.log(error));
+  // sequelize.sync({ alter: true });
 
   //
   return db;
