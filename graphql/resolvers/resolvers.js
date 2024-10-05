@@ -27,6 +27,7 @@ import {
 import {
   conversationCreateSchema,
   conversationDeleteSchema,
+  conversationGetSchema,
   conversationUpdateSchema,
 } from "./validations/conversation.validation.js";
 
@@ -34,12 +35,14 @@ const pubsub = new PubSub();
 
 const resolvers = {
   User: {
-    conversations(user) {
-      // console.log("userConversation", user);
-      return user.getConversation();
+    async conversations(user) {
+      // console.log("userConversation", user.id);
+      // console.log(Object.getOwnPropertyNames(user));
+      // console.log(Object.keys(Object.getPrototypeOf(user)));
+      return user.getSenderConversation();
     },
     async messages(user) {
-      console.log("userMessage", await user.getMessages());
+      // console.log("userMessage", await user.getMessages());
       return user.getMessages();
     },
   },
@@ -60,16 +63,16 @@ const resolvers = {
     },
 
     message(conversation) {
-      console.log("conversation", conversation);
       return conversation.getMessages();
     },
-    async receiver(conversation, args, context, info) {
-      const receiverId = conversation.receiverId; // Assuming a getter
+    async receiver(conversation, args, context) {
+      const receiverId = conversation.receiverId;
       if (!receiverId) {
         return null;
       }
       const receiverUserData = await context.userLoader.load(receiverId);
-      return receiverUserData[0];
+
+      return receiverUserData;
     },
   },
 
@@ -89,14 +92,18 @@ const resolvers = {
 
         // authentication checking
         if (!userId) {
-          return sendUnauthorizeResponse(errorMessage.trim());
+          return sendUnauthorizeResponse(errorMessage);
         } else {
           // get data by search
           const searchData = await searchUsers(searchParam, userId);
-
-          return searchData;
+          // subscription method testing purpose only
+          pubsub.publish("USER_CREATED", {
+            userCreated: "Thanks for searching",
+          });
+          return sendResponse(200, true, "Successfully retrieve", searchData);
         }
       } catch (error) {
+        //
         if (error.code) {
           return error;
         } else {
@@ -115,11 +122,13 @@ const resolvers = {
         if (!userId) {
           return sendUnauthorizeResponse(errorMessage.trim());
         } else {
-          console.log(id);
           // get user by id
           const userData = await findUser(id);
-
-          return userData;
+          if (!userData) {
+            return sendResponse(400, false, "Unable to get", userData);
+          } else {
+            return sendResponse(200, true, "Successfully retrieve", userData);
+          }
         }
       } catch (error) {
         if (error.code) {
@@ -137,20 +146,23 @@ const resolvers = {
         const {
           userAuthentication: { userId, errorMessage },
         } = contextValue;
+
         // authentication checking
         if (!userId) {
           return sendUnauthorizeResponse(errorMessage.trim());
         } else {
           // input data validation checking
-          const { error } = messageCreateSchema.validate(args.conversationId);
+          const { error } = conversationGetSchema.validate({
+            conversationId: args.conversationId,
+          });
           // send response if invalid data
           if (error) {
             return sendValidationResponse(400, false, error.details);
           } else {
             // fetch msg by conversationId
             const getMsg = await getConversationMessages(args.conversationId);
-            console.log("getMsg", getMsg);
-            return getMsg[0];
+
+            return sendResponse(200, true, "Successfully retrieve", getMsg);
           }
         }
       } catch (error) {
@@ -175,8 +187,13 @@ const resolvers = {
         } else {
           // fetch user conversation by userId
           const getConversationData = await getUserConversations(userId);
-
-          return getConversationData[0];
+          console.log("getConversationData", getConversationData);
+          return sendResponse(
+            200,
+            true,
+            "Successfully retrieve",
+            getConversationData
+          );
         }
       } catch (error) {
         if (error.code) {

@@ -12,7 +12,7 @@ scalar GraphQLDateTime
     picture:String
     status:String
     isActive:Boolean
-    createdAt : GraphQLDateTime
+    createdAt : GraphQLDateTime  # this for demo checking
     messages: [Message]
     conversations:[Conversation]
     token:String
@@ -47,6 +47,8 @@ scalar GraphQLDateTime
     receiver: User
     isActive:Boolean
   }
+
+  # user get response #
 
 
   type Subscription {
@@ -126,15 +128,40 @@ scalar GraphQLDateTime
 
 
 #------------ Query start -------------
-  type Query {
-    searchUser(searchParam:String) :[User]
-    oneUser(id: Int!): User
-    allUser: [User!]!
-    oneMessage(id: Int!): Message
-    getConversation:Conversation
-    getMessage(conversationId:Int!):Message
-    
+  type getUserResponses {
+    code:Int!
+    status:Boolean!
+    msg:String!
+    data:[User]
+  }
 
+  type getSingleUserResponses {
+    code:Int!
+    status:Boolean!
+    msg:String!
+    data:User
+  }
+
+  type getMessageResponses {
+    code:Int!
+    status:Boolean!
+    msg:String!
+    data:[Message]
+  }
+
+    type getConversationResponses {
+    code:Int!
+    status:Boolean!
+    msg:String!
+    data:[Conversation]
+  }
+
+  type Query {
+    searchUser(searchParam:String) :getUserResponses
+    oneUser(id: Int!): getSingleUserResponses
+    getConversation:getConversationResponses
+    getMessage(conversationId:Int!):getMessageResponses
+    
   }
  
 
@@ -142,6 +169,7 @@ scalar GraphQLDateTime
   type Mutation {
 #- ------------ User section --------
     createUser(input:CreateUserInput!):CreateUserResponses
+
     updateUser(
       id:Int!
       name:String
@@ -151,6 +179,7 @@ scalar GraphQLDateTime
       password:String
       isActive:Boolean
     ):CreateUserResponses
+
     deleteUser(id:Int!):CreateUserResponses
 # ------------ User section end --------
 # ------- Message section -----
@@ -169,6 +198,7 @@ scalar GraphQLDateTime
 
 #------ Conversation section -----------
      createOpenConversation(input:CreateConversationInput) : CreateConversationResponses
+
      updateConversation(
       id:Int!
       name:String
@@ -176,6 +206,7 @@ scalar GraphQLDateTime
       latestMessageId:Int
       isActive:Boolean
      ): CreateConversationResponses
+
      deleteConversation(id:Int!): CreateConversationResponses
 
   

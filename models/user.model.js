@@ -38,13 +38,13 @@ const User = (sequelize, DataTypes) => {
       onDelete: "CASCADE",
     });
     User.hasMany(models.Conversation, {
-      foreignKey: "serderId",
-      as: "sender",
+      foreignKey: "senderId",
+      as: "senderConversation",
       onDelete: "CASCADE",
     });
     User.hasMany(models.Conversation, {
       foreignKey: "receiverId",
-      as: "receiver",
+      as: "receiverConversation",
       onDelete: "CASCADE",
     });
   };

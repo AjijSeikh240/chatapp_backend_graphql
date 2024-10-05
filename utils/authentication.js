@@ -1,21 +1,30 @@
 import jwt from "jsonwebtoken";
 
-export function getAuthentication(request) {
-  const token = req.headers.authorization;
+export async function getAuthentication(req) {
   try {
-    if (!token)
+    const bearerToken = req.headers.authorization;
+    console.log("bearerToken", bearerToken);
+    if (!bearerToken) {
+      console.log("undefined");
       return {
         userAuthentication: {
           userId: null,
           errorMessage: "token is not exist",
         },
       };
-    const userDecoded = jwt.verify(token, process.env.SECRET_KET);
-    const userAuthentication = { userId: userDecoded?.userId };
-    return { userAuthentication };
+    } else {
+      const token = bearerToken.split(" ")[1];
+      const userDecoded = jwt.verify(token, process.env.SECRET_KEY);
+      const userAuthentication = { userId: userDecoded?.userId };
+      return { userAuthentication };
+    }
   } catch (error) {
+    console.log("error", error);
     return {
-      userAuthentication: { userId: null, errorMessage: "User Unauthorized" },
+      userAuthentication: {
+        userId: null,
+        errorMessage: "User Unauthorized",
+      },
     };
   }
 }

@@ -24,7 +24,7 @@ export const doesConversationExist = async (senderId, receiverId) => {
 export const createConversation = async (data) => {
   try {
     const newConvo = await databaseModel.Conversation.create(data);
-    if (newConvo) {
+    if (!newConvo) {
       throw sendResponse(400, false, "Oops... somethings went wrong");
     }
     return newConvo;
@@ -37,7 +37,9 @@ export const createConversation = async (data) => {
 export const populatedConversation = async (id) => {
   try {
     const populateConve = await databaseModel.Conversation.findByPk(id);
-
+    if (!populateConve) {
+      throw sendResponse(404, false, "Conversation not found");
+    }
     return populateConve;
   } catch (error) {
     console.log("Occurred server error", error);

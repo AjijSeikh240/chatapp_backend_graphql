@@ -11,9 +11,9 @@ export function sendResponse(
   };
 
   if (data !== null && data !== undefined) {
-    // console.log("data", data);
     response.data = data;
   }
+
   return response;
 }
 
@@ -42,6 +42,8 @@ export function sendUnauthorizeResponse(msg) {
     code: 403,
     status: false,
     msg,
+    data: null,
   };
+  console.log("response", response);
   return response;
 }
